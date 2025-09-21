@@ -1,0 +1,58 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Перевірка ролі тренера з колекції /roles/{uid}
+    function isTrainer() {
+      return isSignedIn()
+        && get(/databases/$(database)/documents/roles/$(request.auth.uid)).data.role == 'trainer';
+    }
+
+    // ---- Ролі ----
+    match /roles/{uid} {
+      // Користувач може читати лише свій документ ролі
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow write: if false; // ролі виставляємо вручну в консолі
+    }
+
+    // ---- Бронювання ----
+    match /bookings/{bookingId} {
+
+      // Будь-хто може читати розклад
+      allow read: if true;
+
+      // Хто завгодно може створити PENDING-заявку
+      allow create: if
+        // Випадок 1: звичайний користувач створює pending
+        (
+          request.resource.data.status == 'pending'
+          && request.resource.data.keys().hasOnly(
+            ['id','date','slot','studentName','status','createdAt','updatedAt','email']
+          )
+          && request.resource.id == request.resource.data.date + '_' + request.resource.data.slot
+          && request.resource.data.date.matches('^\\d{4}-\\d{2}-\\d{2}$')
+          && request.resource.data.slot.matches('^([01]\\d|2[0-3]):[0-5]\\d$')
+          && request.resource.data.studentName is string
+        )
+        // Випадок 2: тренер створює (pending або confirmed)
+        || (
+          isTrainer()
+          && request.resource.data.status in ['pending','confirmed']
+          && request.resource.data.keys().hasOnly(
+            ['id','date','slot','studentName','status','createdAt','updatedAt','email']
+          )
+          && request.resource.id == request.resource.data.date + '_' + request.resource.data.slot
+          && request.resource.data.date.matches('^\\d{4}-\\d{2}-\\d{2}$')
+          && request.resource.data.slot.matches('^([01]\\d|2[0-3]):[0-5]\\d$')
+          && request.resource.data.studentName is string
+        );
+
+      // Оновлення/видалення дозволені лише тренеру
+      allow update, delete: if isTrainer();
+    }
+  }
+}

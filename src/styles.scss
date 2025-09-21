@@ -1,1 +1,91 @@
-/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+
+/* Core */
+@include mat.core();
+
+/* Базова тема (Material 3) */
+:root {
+  @include mat.theme((
+    color: (theme-type: light),
+    typography: (
+      plain-family: 'Roboto, "Helvetica Neue", Arial, sans-serif',
+      brand-family: 'Roboto, "Helvetica Neue", Arial, sans-serif',
+      regular-weight: 400,
+      medium-weight: 500,
+      bold-weight: 700
+    ),
+    density: (scale: 0)
+  ));
+
+  /* === БРЕНД-КОЛЬОРИ (Emerald primary, Indigo secondary) === */
+  --md-sys-color-primary:               #10b981;  /* кнопки, акценти */
+  --md-sys-color-on-primary:            #ffffff;
+  --md-sys-color-primary-container:     #d1fae5;
+  --md-sys-color-on-primary-container:  #064e3b;
+
+  --md-sys-color-secondary:             #6366f1;
+  --md-sys-color-on-secondary:          #ffffff;
+  --md-sys-color-secondary-container:   #e0e7ff;
+  --md-sys-color-on-secondary-container:#1e1b4b;
+
+  --md-sys-color-surface:               #f8fafc;
+  --md-sys-color-on-surface:            #0f172a;
+  --md-sys-color-outline:               #cbd5e1;
+}
+
+/* ===== Глобальні стилі ===== */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.container { max-width: 1100px; margin: 0 auto; padding: 16px; }
+@media (max-width: 600px) { .container { padding: 12px; } }
+
+/* ===== Toolbar (чіткий білий фон без рожевого відтінку) ===== */
+header.toolbar,
+.toolbar,
+.mat-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
+  background-color: #ffffff !important;                 /* ← змінюй, якщо треба інший колір */
+  color: var(--md-sys-color-on-surface) !important;
+
+  /* вимикаємо розмиття/прозорість, що давали рожевий відтінок */
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+
+  border-bottom: 1px solid var(--md-sys-color-outline);
+  box-shadow: none;
+}
+.toolbar a,
+.mat-toolbar a {
+  color: var(--md-sys-color-primary) !important;
+  text-decoration: none;
+}
+.toolbar a:hover { text-decoration: underline; }
+
+.spacer { flex: 1 1 auto; }
+.logo { font-weight: 700; letter-spacing: .2px; }
+
+/* Кнопки — комфортна ціль */
+button,
+.mat-mdc-button,
+.mat-mdc-stroked-button,
+.mat-mdc-raised-button { min-height: 44px; }
+
+/* Стани слотів (допоміжно, конкретні кольори у Home) */
+button.pending   { border-color: #f59e0b !important; }  /* amber */
+button.confirmed { border-color: #16a34a !important; }  /* green */
+button.canceled  { border-color: #94a3b8 !important; }  /* slate */

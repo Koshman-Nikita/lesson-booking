@@ -1,0 +1,95 @@
+<mat-card class="admin-section">
+  <h2>Запити на підтвердження</h2>
+
+  <div *ngIf="pending().length === 0" class="empty">Немає нових заявок.</div>
+
+  <div class="list">
+    <div class="row" *ngFor="let b of pending()">
+      <div class="cell when">
+        <div class="date">{{ b.date }}</div>
+        <div class="time">{{ b.slot }}</div>
+      </div>
+      <div class="cell who">
+        <div class="name">{{ b.studentName }}</div>
+        <div class="email" *ngIf="b.email">{{ b.email }}</div>
+        <span class="chip chip-pending">В обробці</span>
+      </div>
+      <div class="cell actions">
+        <button mat-flat-button color="primary" (click)="confirm(b)">Підтвердити</button>
+        <button mat-stroked-button color="warn" (click)="cancel(b)">Скасувати</button>
+        <button mat-button (click)="reschedule(b)">Перенести</button>
+      </div>
+    </div>
+  </div>
+</mat-card>
+
+<mat-card class="admin-section">
+  <h2>Підтверджені записи</h2>
+
+  <div *ngIf="confirmed().length === 0" class="empty">Поки що немає.</div>
+
+  <div class="list">
+    <div class="row" *ngFor="let b of confirmed()">
+      <div class="cell when">
+        <div class="date">{{ b.date }}</div>
+        <div class="time">{{ b.slot }}</div>
+      </div>
+      <div class="cell who">
+        <div class="name">{{ b.studentName }}</div>
+        <div class="email" *ngIf="b.email">{{ b.email }}</div>
+        <span class="chip chip-confirmed">Підтверджено</span>
+      </div>
+      <div class="cell actions">
+        <button mat-stroked-button color="warn" (click)="cancel(b)">Скасувати</button>
+        <button mat-button (click)="reschedule(b)">Перенести</button>
+      </div>
+    </div>
+  </div>
+</mat-card>
+
+<mat-card class="admin-section">
+  <h2>Створити запис вручну</h2>
+
+  <div class="manual">
+    <!-- Дата -->
+    <mat-form-field appearance="outline">
+      <mat-label id="createDateLbl">Дата</mat-label>
+      <input matInput id="createDate" [matDatepicker]="picker" [ngModel]="createDate()"
+        (dateChange)="createDate.set($event.value)" aria-labelledby="createDateLbl" aria-label="Дата уроку"
+        placeholder="Оберіть дату" />
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+
+    <!-- Час -->
+    <mat-form-field appearance="outline">
+      <mat-label id="createTimeLbl">Час</mat-label>
+      <mat-select id="createTime" [ngModel]="createSlot()" (ngModelChange)="createSlot.set($event)"
+        aria-labelledby="createTimeLbl" aria-label="Час уроку">
+        <mat-option *ngFor="let s of slots()" [value]="s" title="Слот {{ s }}">{{ s }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Ім'я -->
+    <mat-form-field appearance="outline" class="grow">
+      <mat-label id="createNameLbl">Ім’я учня</mat-label>
+      <input matInput id="createName" [ngModel]="createName()" (ngModelChange)="createName.set($event)"
+        aria-labelledby="createNameLbl" aria-label="Ім’я учня" placeholder="Ім’я та прізвище" autocomplete="name" />
+    </mat-form-field>
+
+    <!-- E-mail -->
+    <mat-form-field appearance="outline" class="grow">
+      <mat-label id="createEmailLbl">E-mail (необов’язково)</mat-label>
+      <input matInput type="email" id="createEmail" [ngModel]="createEmail()" (ngModelChange)="createEmail.set($event)"
+        aria-labelledby="createEmailLbl" aria-label="Електронна пошта" placeholder="you@example.com" inputmode="email"
+        autocomplete="email" />
+    </mat-form-field>
+
+    <div class="manual-actions">
+      <button mat-raised-button color="primary" (click)="createManual()" aria-label="Створити підтверджений запис">
+        Створити (підтверджено)
+      </button>
+      <button mat-button color="warn" (click)="logout()" aria-label="Вийти з адмінки">Вийти</button>
+    </div>
+  </div>
+</mat-card>

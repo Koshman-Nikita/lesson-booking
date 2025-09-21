@@ -1,0 +1,80 @@
+/* Контейнер картки */
+.box {
+  padding: 16px;
+}
+
+/* Сітка слотів */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+/* Кнопка слоту */
+.grid button {
+  border-radius: 9999px;
+  padding: 10px 14px;
+  min-height: 58px;                 /* фікс однакової висоти */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  text-align: center;
+}
+
+/* Верхній ряд: час + бейдж (в один ряд, без переносу) */
+.grid button .line {
+  display: flex;
+  align-items: center;
+  justify-content: center;          /* центровано */
+  gap: 10px;
+  white-space: nowrap;              /* щоб не ламався рядок */
+}
+
+/* Час */
+.grid .time {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+/* Бейдж-статус */
+.grid .pill {
+  font-size: 12px;
+  padding: 2px 10px;
+  line-height: 1.2;
+  border-radius: 9999px;
+  background: #e6f0ff;
+  color: #0b4a8a;
+  border: 1px solid #cfe0ff;
+  white-space: nowrap;              /* не переносити текст бейджа */
+}
+
+/* Рядок з ім’ям під бейджем */
+.grid .student {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #334155;
+  min-height: 16px;                 /* резерв місця, щоб кнопки не "стрибали" */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Стани кнопок */
+.grid button.free      { /* за бажанням – базовий вигляд */ }
+.grid button.selected  { border-color: #7c3aed !important; box-shadow: 0 0 0 2px rgba(124,58,237,.15) inset; }
+.grid button.past      { opacity: .55; cursor: default; }
+
+.grid button.pending   {
+  border-color: #f59e0b !important;
+  background: #fff7ed;
+}
+.grid button.confirmed {
+  border-color: #16a34a !important;
+  background: #ecfdf5;
+}
+
+/* Адаптивні дрібниці */
+@media (max-width: 520px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+}

@@ -1,0 +1,105 @@
+<mat-card class="box">
+  <h2>Запис на уроки</h2>
+
+  <div class="controls">
+    <!-- Дата -->
+    <mat-form-field appearance="outline">
+      <mat-label id="dateLabel">Дата</mat-label>
+      <input
+        matInput
+        [matDatepicker]="picker"
+        id="lessonDate"
+        name="lessonDate"
+        [min]="minDate()"
+        [(ngModel)]="dateModel"
+        (dateChange)="onDateChange($event.value)"
+        aria-labelledby="dateLabel"
+        aria-label="Дата уроку"
+        placeholder="Оберіть дату"
+      />
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+
+    <!-- Ім'я -->
+    <mat-form-field appearance="outline" class="name-field">
+      <mat-label id="nameLabel">Ваше ім’я</mat-label>
+      <input
+        matInput
+        id="studentName"
+        name="studentName"
+        [ngModel]="name()"
+        (ngModelChange)="name.set($event)"
+        aria-labelledby="nameLabel"
+        aria-label="Ім’я учня"
+        placeholder="Ім’я та прізвище"
+      />
+    </mat-form-field>
+
+    <!-- Опційний e-mail -->
+    <div class="email-opt">
+      <label class="switch" for="emailOpt">
+        <input
+          id="emailOpt"
+          type="checkbox"
+          [ngModel]="wantEmail()"
+          (ngModelChange)="wantEmail.set($event)"
+          aria-label="Отримувати оновлення на e-mail"
+        />
+        <span>Отримувати оновлення на e-mail</span>
+      </label>
+
+      <mat-form-field appearance="outline" *ngIf="wantEmail()">
+        <mat-label>E-mail</mat-label>
+        <input
+          matInput
+          type="email"
+          placeholder="you@example.com"
+          [ngModel]="email()"
+          (ngModelChange)="email.set($event)"
+          autocomplete="email"
+        />
+      </mat-form-field>
+    </div>
+
+    <!-- Кнопка запису -->
+    <button
+      mat-flat-button
+      color="primary"
+      class="book-btn"
+      [disabled]="!selectedSlot() || !name().trim() || (wantEmail() && !email().trim())"
+      (click)="bookSelected()"
+      aria-label="Підтвердити запис на обраний час"
+    >
+      Записатися
+    </button>
+
+    <div class="chosen" *ngIf="selectedSlot()">Обрано: {{ selectedSlot() }}</div>
+  </div>
+
+  <!-- Сітка слотів -->
+  <div class="grid" [class.loading]="loading()">
+    <button
+      mat-stroked-button
+      *ngFor="let s of slots()"
+      (click)="selectSlot(s)"
+      [ngClass]="slotClass(s)"
+      [disabled]="isPastSlot(s) || statusOf(s) === 'pending' || statusOf(s) === 'confirmed'"
+      aria-label="Слот {{s}} {{statusLabel(s)}}"
+    >
+      <div class="line">
+        <span class="time">{{ s }}</span>
+        <span
+          class="pill"
+          [class.free]="slotClass(s)==='free' || slotClass(s)==='selected'"
+          [class.past]="slotClass(s)==='past'"
+        >
+          {{ statusLabel(s) }}
+        </span>
+      </div>
+      <div class="student" *ngIf="nameOf(s) as nm">{{ nm }}</div>
+    </button>
+  </div>
+
+  <div class="hint" *ngIf="message()">{{ message() }}</div>
+</mat-card>

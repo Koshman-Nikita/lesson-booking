@@ -1,0 +1,49 @@
+<mat-card class="card">
+  <h2>Вхід тренера</h2>
+
+  <form (ngSubmit)="login()" autocomplete="on" novalidate>
+    <mat-form-field appearance="outline" class="w100">
+      <mat-label id="emailLabel">Email</mat-label>
+      <input
+        matInput
+        id="email"
+        name="email"
+        type="email"
+        required
+        [ngModel]="email()"
+        (ngModelChange)="email.set($event)"
+        aria-labelledby="emailLabel"
+        aria-label="Електронна пошта"
+        placeholder="trainer@example.com"
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w100">
+      <mat-label id="passLabel">Пароль</mat-label>
+      <input
+        matInput
+        id="password"
+        name="password"
+        type="password"
+        required
+        [ngModel]="password()"
+        (ngModelChange)="password.set($event)"
+        aria-labelledby="passLabel"
+        aria-label="Пароль"
+        placeholder="Введіть пароль"
+      />
+    </mat-form-field>
+
+    <button
+      mat-flat-button
+      color="primary"
+      type="submit"
+      [disabled]="loading() || !email().trim() || !password()"
+    >
+      Увійти
+    </button>
+
+    <!-- повідомлення про помилку -->
+    <span class="error" *ngIf="error()" aria-live="polite">{{ error() }}</span>
+  </form>
+</mat-card>
