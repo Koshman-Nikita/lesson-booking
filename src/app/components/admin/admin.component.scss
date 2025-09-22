@@ -1,35 +1,52 @@
+/* Загальні відступи секцій */
 .admin-section {
-  margin-bottom: 20px;
+  margin: 16px auto;
   padding: 16px;
+  max-width: 980px;
 }
 
+/* Порожні стани */
 .empty {
   color: #64748b;
   padding: 12px 4px;
 }
 
+/* Список заявок */
 .list {
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
+/* Картка заявки */
 .row {
   display: grid;
-  grid-template-columns: 160px 1fr auto;
+  grid-template-columns: 160px 1fr auto; /* Дата/час | Хто | Кнопки */
   gap: 12px;
   align-items: center;
-  padding: 10px 12px;
+  padding: 12px;
   border: 1px solid #e5e7eb;
-  border-radius: 14px;
+  border-radius: 16px;
   background: #fff;
 }
 
-.cell.when .date { font-weight: 600; }
-.cell.when .time { color: #334155; }
+/* Ліва колонка: дата/час */
+.cell.when .date { font-weight: 700; }
+.cell.when .time { color: #475569; }
 
-.cell.who .name { font-weight: 600; }
-.cell.who .email { color: #64748b; font-size: 12px; }
+/* Середня колонка: ім’я/e-mail/чіп статусу */
+.cell.who .name  { font-weight: 700; }
+.cell.who .email {
+  color: #64748b;
+  font-size: 12px;
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;   /* довгі адреси не ламають лейаут */
+  word-break: break-word;
+}
 
+/* Чіпи статусу */
 .chip {
   display: inline-block;
   padding: 2px 10px;
@@ -41,11 +58,47 @@
 .chip-pending   { background: #fff7ed; color: #b45309; border-color: #fdba74; }
 .chip-confirmed { background: #ecfdf5; color: #065f46; border-color: #6ee7b7; }
 
-.cell.actions button + button { margin-left: 8px; }
+/* Права колонка: кнопки */
+.cell.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.cell.actions button { min-height: 44px; }
 
+/* --- Адаптив --- */
+
+/* Планшет: складаємо у 2 колонки (контент | кнопки) */
+@media (max-width: 840px) {
+  .row {
+    grid-template-columns: 1fr auto;
+    align-items: start;
+  }
+  .cell.when { display: flex; gap: 10px; }
+}
+
+/* Телефон: все у стовпчик; кнопки у 2 колонки */
+@media (max-width: 600px) {
+  .row { grid-template-columns: 1fr; }
+  .cell.actions {
+    justify-content: stretch;
+  }
+  .cell.actions button {
+    flex: 1 1 calc(50% - 8px);   /* дві кнопки в ряд */
+  }
+}
+
+/* Дуже вузькі екрани: по одній кнопці в рядок, дрібніший чіп */
+@media (max-width: 420px) {
+  .cell.actions button { flex-basis: 100%; }
+  .chip { font-size: 11px; padding: 2px 8px; }
+}
+
+/* --- Блок "Створити запис вручну" --- */
 .manual {
   display: grid;
-  grid-template-columns: 200px 160px 1fr 1fr;
+  grid-template-columns: 200px 160px 1fr 1fr; /* дата | час | ім'я | e-mail */
   gap: 12px;
   align-items: center;
 }
@@ -54,5 +107,19 @@
 
 .manual-actions {
   grid-column: 1 / -1;
-  display: flex; gap: 12px; align-items: center;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Планшет */
+@media (max-width: 900px) {
+  .manual { grid-template-columns: 1fr 1fr; }
+}
+
+/* Телефон: по одному полю в рядок, кнопки на всю ширину */
+@media (max-width: 600px) {
+  .manual { grid-template-columns: 1fr; }
+  .manual-actions { justify-content: stretch; }
+  .manual-actions button { width: 100%; min-height: 46px; }
 }

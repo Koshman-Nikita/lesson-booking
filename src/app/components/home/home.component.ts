@@ -34,10 +34,13 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   private subs = new Subscription();
 
+  // === НОВЕ: мінімальна дата — ЗАВТРА ===
+  private tomorrow = dayjs().add(1, 'day').startOf('day').toDate();
+
   // модель/стан
-  dateModel: Date = new Date();
-  date = signal<Date>(this.dateModel);
-  minDate = signal<Date>(new Date(new Date().setHours(0, 0, 0, 0)));
+  dateModel: Date = this.tomorrow;                       // стартово завтра
+  date = signal<Date>(this.tomorrow);                    // сигнал теж завтра
+  minDate = signal<Date>(this.tomorrow);                 // використовується в шаблоні
 
   name = signal('');
   wantEmail = signal(false);
@@ -53,8 +56,15 @@ export class HomeComponent implements OnInit, OnDestroy {
   // формати
   dateStr = computed(() => dayjs(this.date()).format('YYYY-MM-DD'));
 
+  // допоміжне: обрана дата — сьогодні?
+  private isSelectedToday = computed(() =>
+    dayjs(this.date()).isSame(dayjs(), 'day')
+  );
+
   // слоти робочого дня
+  // === НОВЕ: якщо обрано сьогодні — повертаємо порожній список (нічого не показуємо) ===
   slots = computed(() => {
+    if (this.isSelectedToday()) return [];
     const { start, end, slotMinutes } = environment.booking;
     const [sh, sm] = start.split(':').map(Number);
     const [eh, em] = end.split(':').map(Number);
@@ -113,14 +123,13 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   isPastSlot(slot: string) {
+    // Якщо обрано сьогодні — все минуле (ми взагалі не показуємо слоти, але залишимо захист)
     const selected = dayjs(this.date()).startOf('day');
     const now = dayjs();
     if (selected.isBefore(now.startOf('day'))) return true;
-    if (selected.isSame(now.startOf('day'))) {
-      const [hh, mm] = slot.split(':').map(Number);
-      return selected.hour(hh).minute(mm).isBefore(now);
-    }
-    return false;
+    if (selected.isSame(now.startOf('day'))) return true; // бронювання на сьогодні заборонене
+    const [hh, mm] = slot.split(':').map(Number);
+    return selected.hour(hh).minute(mm).isBefore(now);
   }
 
   statusOf(slot: string) {
@@ -146,6 +155,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   selectSlot(slot: string) {
+    // Заборона для сьогоднішньої дати
+    if (this.isSelectedToday()) return;
     if (this.isPastSlot(slot)) return;
     const s = this.statusOf(slot);
     if (s === 'pending' || s === 'confirmed') return; // зайнято
@@ -164,6 +175,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (!slot) { this.message.set('Оберіть час'); return; }
     if (!studentName) { this.message.set('Вкажіть ім’я'); return; }
     if (this.wantEmail() && !email) { this.message.set('Вкажіть коректний e-mail або вимкніть опцію'); return; }
+    // Захист: взагалі не бронюємо сьогодні
+    if (dayjs(this.date()).isSame(dayjs(), 'day')) { this.message.set('Бронювання на сьогодні недоступне'); return; }
     if (this.isPastSlot(slot)) { this.message.set('Не можна бронювати минулий час'); return; }
 
     const id = this.idOf(slot);

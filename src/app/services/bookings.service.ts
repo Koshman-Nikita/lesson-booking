@@ -12,7 +12,8 @@ import {
   deleteDoc,
   addDoc,
 } from '@angular/fire/firestore';
-import { Observable, firstValueFrom } from 'rxjs';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 export type BookingStatus = 'pending' | 'confirmed' | 'canceled';
 
@@ -24,7 +25,7 @@ export interface Booking {
   status: BookingStatus;
   createdAt: number;
   updatedAt: number;
-  email?: string;           // <-- опційно
+  email?: string;           // опційно
 }
 
 @Injectable({ providedIn: 'root' })
@@ -34,11 +35,24 @@ export class BookingsService {
 
   private makeId(date: string, slot: string) { return `${date}_${slot}`; }
 
+  // --- внутрішнє: прибирання PENDING старших за 48 год ---
+  private readonly TTL_MS = 48 * 60 * 60 * 1000;
+
+  private async cleanupExpiredPending(list: Booking[]) {
+    const cutoff = Date.now() - this.TTL_MS;
+    for (const b of list) {
+      if (b.status === 'pending' && (b.createdAt ?? 0) < cutoff) {
+        try { await this.remove(b.id); } catch { /* ігноруємо */ }
+      }
+    }
+  }
+
   // --------- Реал-тайм стріми ---------
   streamByDate(date: string): Observable<Booking[]> {
     const q = query(this.col, where('date', '==', date));
     return collectionData(q, { idField: 'id' }) as unknown as Observable<Booking[]>;
   }
+
   // PENDING по всіх датах
   streamPendingAll() {
     const q = query(
@@ -47,7 +61,8 @@ export class BookingsService {
       orderBy('date'),
       orderBy('slot')
     );
-    return collectionData(q, { idField: 'id' }) as Observable<Booking[]>;
+    return (collectionData(q, { idField: 'id' }) as Observable<Booking[]>)
+      .pipe(tap(list => this.cleanupExpiredPending(list)));
   }
 
   // CONFIRMED по всіх датах
@@ -60,7 +75,6 @@ export class BookingsService {
     );
     return collectionData(q, { idField: 'id' }) as Observable<Booking[]>;
   }
-
 
   // --------- Мутації ---------
   async createPending(date: string, slot: string, studentName: string, email?: string) {
